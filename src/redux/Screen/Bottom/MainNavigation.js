@@ -5,6 +5,9 @@ import {useTheme, Text} from 'react-native-paper';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import Home from '../Home/Home';
 import {isPlatformIOS} from '../../../../utils/global';
+import User from '../Users/User';
+import Settings from '../Profile/Profile';
+import Chats from '../Chats/Chats';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,8 +19,8 @@ const TabIcon = ({name, focused, theme}) => {
     iconName = 'people-outline';
   } else if (name === 'People') {
     iconName = 'people-outline';
-  } else if (name === 'Settings') {
-    iconName = 'cog-outline';
+  } else if (name === 'Profile') {
+    iconName = 'person-circle-outline';
   } else if (name === 'Chat') {
     iconName = 'chatbubbles-outline';
   }
@@ -72,9 +75,9 @@ export default function BottomNavigation() {
           },
         })}>
         <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="People" component={Home} />
-        <Tab.Screen name="Chat" component={Home} />
-        <Tab.Screen name="Settings" component={Home} />
+        <Tab.Screen name="People" component={User} />
+        <Tab.Screen name="Chat" component={Chats} />
+        <Tab.Screen name="Profile" component={Settings} />
       </Tab.Navigator>
     </View>
   );

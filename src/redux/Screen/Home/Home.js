@@ -8,10 +8,17 @@ import {
 import React from 'react';
 import HomeHeader from '../../../Component/AppHeader/HomeHeader';
 import {Divider, Text, useTheme} from 'react-native-paper';
-import {hexToRgba} from '../../../../utils/global';
+import {handleNavigate, hexToRgba} from '../../../../utils/global';
+import UserCard from './UserCard';
+import RecentChat from './RecentChat';
+import HomeAnim from '../../../Component/Anim/HomeAnim';
+import SmallBtn from '../../../Component/Btn/SmallBtn';
+import {useNavigation} from '@react-navigation/native';
 
 export default function Home() {
   let {colors} = useTheme();
+  let navigation = useNavigation();
+
   return (
     <>
       <SafeAreaView
@@ -22,22 +29,47 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}>
             <HomeHeader />
-
             {/* Divider */}
             <View className="flex-1 my-3">
               <Divider
                 className="shadow-sm "
                 style={{
                   backgroundColor: hexToRgba(colors.text_disabled, 0.1),
-                  height: 6, // Ensures a thin line
+                  height: 4, // Ensures a thin line
                   shadowColor: colors.primary_main,
                 }}
               />
             </View>
 
-            <Text className="text-3xl font-p_medium text-center px-3">
-              CodeSnap: Share code, debug fast, and grow with AI.
-            </Text>
+            <View className="flex absoulte">
+              <Text className="text-xl font-p_medium capitalize text-start px-3">
+                Build faster with AI
+              </Text>
+              <Text
+                className="text-sm font-regular capitalize text-start px-3"
+                style={{
+                  color: colors.text_disabled,
+                }}>
+                Write cleaner code, fix bugs quicker, and bring ideas to life
+                faster.
+              </Text>
+              <View className="flex-row top-20 left-2 absolute">
+                <SmallBtn
+                  lable={'Start Chat'}
+                  onPress={() => handleNavigate(navigation, 'Chat')}
+                />
+              </View>
+              <HomeAnim />
+            </View>
+
+            {/* User card showing top user  */}
+            <View className="bottom-20">
+              <UserCard />
+            </View>
+
+            <View className="bottom-20">
+              <RecentChat />
+            </View>
           </ScrollView>
         </View>
       </SafeAreaView>

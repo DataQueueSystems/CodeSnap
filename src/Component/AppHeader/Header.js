@@ -1,9 +1,7 @@
 import React from 'react';
 import {Appbar, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
-import {Iconify} from 'react-native-iconify';
-import CustomText from '../CustomText/CustomText';
-import {fonts} from '../CustomText/fonts';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 
 export default function AppHeader({
   screenName,
@@ -12,7 +10,7 @@ export default function AppHeader({
   absolute,
   RenderMenu,
 }) {
-  const theme = useTheme();
+  const {colors} = useTheme();
   const navigation = useNavigation();
 
   const handleBackPress = () => {
@@ -28,7 +26,7 @@ export default function AppHeader({
         right: 0,
         backgroundColor: 'transparent',
       }
-    : {backgroundColor: theme.colors.background_default, height: 50};
+    : {backgroundColor: colors.background_default, height: 50};
 
   return (
     <Appbar.Header style={[absoluteStyle]}>
@@ -36,20 +34,16 @@ export default function AppHeader({
         <Appbar.Action
           animated={false}
           icon={() => (
-            <Iconify
-              icon="weui:back-filled" // Custom icon name
-              size={24}
-              color={
-                absolute
-                  ? theme.colors.text_secondary
-                  : theme.colors.text_primary
-              }
+            <Ionicon
+              name="chevron-back-outline"
+              size={22}
+              color={colors.text_secondary}
               style={{alignSelf: 'center'}}
             />
           )}
           onPress={handleBackPress}
           style={{
-            backgroundColor: theme.colors.background_default,
+            backgroundColor: colors.background_default,
           }}
         />
       )}
@@ -57,8 +51,9 @@ export default function AppHeader({
         title={screenName}
         titleStyle={{
           fontSize: 17,
-          fontFamily: fonts.Medium,
-          color: theme.colors.text_primary,
+          textAlign: 'center',
+          fontFamily: 'Poppins-Medium',
+          color: colors.text_primary,
           left: !backIcon ? 0 : 0,
         }}
       />

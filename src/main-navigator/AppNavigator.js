@@ -10,6 +10,7 @@ import Onboarding from '../redux/Screen/Auth/Onboarding';
 import Login from '../redux/Screen/Auth/Login';
 import Register from '../redux/Screen/Auth/Register';
 import Parent from './Parent';
+import SingleChat from '../redux/Screen/Chats/SingleChat';
 const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   const {token, tokenStatus, isConnected} = useSelector(state => state?.normal);
@@ -45,21 +46,20 @@ export default function AppNavigator() {
           (!token && tokenStatus === 'succeeded') ? (
             // (token && tokenStatus === 'succeeded') ? (
             // If token status is failed or no token, show onBoarding screen
+            <Stack.Screen
+              name="FirstScreen"
+              component={Onboarding}
+              options={{animation: 'fade_from_bottom'}}
+            />
+          ) : (
             // <Stack.Screen
-            //   name="FirstScreen"
-            //   component={Onboarding}
+            //   name="Parent"
+            //   component={Parent}
             //   options={{animation: 'fade_from_bottom'}}
             // />
-            <Stack.Screen
-            name="Parent"
-            component={Parent}
-            options={{animation: 'fade_from_bottom'}}
-          />
-          ) : (
             // If token is valid, navigate to Parent screen
             <></>
           )}
-          
 
           <Stack.Screen
             name="Login"
@@ -67,15 +67,21 @@ export default function AppNavigator() {
             options={{animation: 'fade_from_bottom'}}
           />
 
-          {/* <Stack.Screen
+          <Stack.Screen
             name="Parent"
             component={Parent}
             options={{animation: 'fade_from_bottom'}}
-          /> */}
+          />
 
           <Stack.Screen
             name="Register"
             component={Register}
+            options={{animation: 'fade_from_bottom'}}
+          />
+          {/* single Chat */}
+          <Stack.Screen
+            name="Single Chat"
+            component={SingleChat}
             options={{animation: 'fade_from_bottom'}}
           />
         </Stack.Navigator>

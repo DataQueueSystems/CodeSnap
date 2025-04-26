@@ -1,5 +1,8 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
+import firestore from '@react-native-firebase/firestore';
+
+
 
 export const getUserDetails = createAsyncThunk(
   'user/getuserdetail',
@@ -21,6 +24,29 @@ export const getUserDetails = createAsyncThunk(
     }
   },
 );
+
+// Firestore Register Function
+export const RegisterUser = (userData) => async (dispatch) => {
+  try {
+    await firestore()
+      .collection('users') // your collection name
+      .add({
+        ...userData,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+    console.log('User registered successfully!');
+    
+    // Optional: Dispatch success action if you have Redux actions
+    // dispatch({ type: 'REGISTER_SUCCESS' });
+
+  } catch (error) {
+    console.error('Error registering user:', error);
+    
+    // Optional: Dispatch error action
+    // dispatch({ type: 'REGISTER_FAIL', payload: error.message });
+  }
+};
 
 const initialState = {
   user: null,

@@ -2,15 +2,14 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {TextInput, useTheme} from 'react-native-paper';
 import {hexToRgba} from '../../../utils/global';
-import {fonts} from '../CustomText/fonts';
-import {Iconify} from 'react-native-iconify';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 
-export default function SearchInput({placeholder, onPress,onChangeText}) {
+export default function SearchInput({placeholder, onPress, onChangeText}) {
   let {colors} = useTheme();
   return (
     <>
-      <TextInput 
-      onChangeText={onChangeText}
+      <TextInput
+        onChangeText={onChangeText}
         onPress={onPress}
         style={{
           backgroundColor: 'transparent',
@@ -22,18 +21,18 @@ export default function SearchInput({placeholder, onPress,onChangeText}) {
         theme={{
           colors: {
             primary: colors.primary_light,
-            outline: hexToRgba(colors.primary_main, 0.3), // Border color when not focused
+            outline: hexToRgba(colors.primary_main, 0.4), // Border color when not focused
           },
         }}
-        contentStyle={{fontFamily: fonts.Regular, top: 2, right: 10}}
+        contentStyle={{fontFamily: 'Poppins-Regular', top: 2, right: 10}}
         left={
           <TextInput.Icon
             disabled
             icon={() => (
-              <Iconify
-                icon={'bitcoin-icons:search-filled'}
-                size={24}
-                color={colors.iconhigh}
+              <Ionicon
+                name="search-outline"
+                size={22}
+                color={colors.text_secondary}
               />
             )}
           />

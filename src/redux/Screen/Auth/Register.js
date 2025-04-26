@@ -17,7 +17,7 @@ import * as Yup from 'yup';
 import {useDispatch, useSelector} from 'react-redux';
 import PrimaryBtn from '../../../Component/Btn/PrimaryBtn';
 import InputField from '../../../Component/Input/InputField';
-import {clearLoginError} from '../../slices/userSlice';
+import {clearLoginError, RegisterUser} from '../../slices/userSlice';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import {Activity_Opacity, handleNavigate} from '../../../../utils/global';
 
@@ -38,6 +38,7 @@ export default function Register() {
   const onSubmit = async values => {
     console.log(values);
     // Your login dispatch here
+    dispatch(RegisterUser(values));
   };
 
   return (

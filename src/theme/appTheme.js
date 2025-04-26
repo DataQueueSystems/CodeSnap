@@ -43,6 +43,8 @@ export const lightTheme = {
     // Primary overrides for Paper components
     primary: commonColors.primary_main,
     onPrimary: '#FFFFFF',
+    blueText: '#063BA7',
+    
   },
   roundness: 14,
 };
@@ -63,6 +65,7 @@ export const darkTheme = {
     // Primary overrides for Paper components
     primary: commonColors.primary_main,
     onPrimary: '#FFFFFF',
+    blueText:"#bfdbfe"
   },
   roundness: 14,
 };

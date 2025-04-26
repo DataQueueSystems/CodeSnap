@@ -2,7 +2,11 @@ import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import {Text, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
-import {Activity_Opacity, getGreeting} from '../../../utils/global';
+import {
+  Activity_Opacity,
+  getGreeting,
+  handleNavigate,
+} from '../../../utils/global';
 
 export default function HomeHeader({}) {
   let {colors} = useTheme();
@@ -30,7 +34,7 @@ export default function HomeHeader({}) {
         {/* Profile Avtar  */}
         <View className="flex-row items-center space-x-3">
           <TouchableOpacity
-            // onPress={handleNavigate}
+            onPress={() => handleNavigate(navigation, 'Profile')}
             activeOpacity={Activity_Opacity}>
             <View
               className="w-10 h-10 rounded-full flex-row items-center justify-center"
@@ -49,7 +53,7 @@ export default function HomeHeader({}) {
       <View className=" flex-column  px-3 mt-5">
         <Text className={'text-md font-regular'}>{getGreeting()},</Text>
         <Text
-          className={'text-xl font-semi'}
+          className={'text-lg font-p_medium'}
           style={{
             color: colors.text_primary,
           }}>
