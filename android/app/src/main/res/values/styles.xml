@@ -1,0 +1,17 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+                <!-- <item name="android:statusBarColor">@color/primary</item> Set status bar color -->
+    <!-- <item name="android:navigationBarColor">#1d2626</item> Set bottom navigation bar color -->
+    </style>
+     <!-- BootSplash theme -->
+    <style name="BootTheme" parent="Theme.BootSplash">
+        <!-- <item name="android:windowBackground">@drawable/boot_splash_background</item> Reference the gradient -->
+        <item name="bootSplashLogo">@drawable/applogo</item>  
+            <!-- <item name="bootSplashLogo">@drawable/boot_splash_logo_rounded</item>  -->
+        <item name="postBootSplashTheme">@style/AppTheme</item> <!-- App theme -->
+    </style>
+</resources>
+
