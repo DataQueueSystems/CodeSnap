@@ -14,11 +14,14 @@ import RecentChat from './RecentChat';
 import HomeAnim from '../../../Component/Anim/HomeAnim';
 import SmallBtn from '../../../Component/Btn/SmallBtn';
 import {useNavigation} from '@react-navigation/native';
+import InCompleteProfile from '../Profile/InCompleteProfile';
+import { useSelector } from 'react-redux';
 
 export default function Home() {
   let {colors} = useTheme();
   let navigation = useNavigation();
-
+  const {user}=useSelector(state=>state?.user);
+  let isProfileUpdated = user?.location && user?.info;
   return (
     <>
       <SafeAreaView
@@ -29,6 +32,13 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}>
             <HomeHeader />
+
+            {/* Incomplete Profile */}
+            {!isProfileUpdated&&(
+              <InCompleteProfile />
+            )}
+
+            
             {/* Divider */}
             <View className="flex-1 my-3">
               <Divider
@@ -55,7 +65,7 @@ export default function Home() {
               </Text>
               <View className="flex-row top-20 left-2 absolute">
                 <SmallBtn
-                  lable={'Start Chat'}
+                  label={'Start Chat'}
                   onPress={() => handleNavigate(navigation, 'Chat')}
                 />
               </View>

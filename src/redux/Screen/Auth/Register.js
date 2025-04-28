@@ -1,4 +1,5 @@
 import {
+  Alert,
   BackHandler,
   Image,
   Keyboard,
@@ -10,14 +11,18 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Text, useTheme, IconButton} from 'react-native-paper';
+import {Text, useTheme, IconButton, HelperText} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch, useSelector} from 'react-redux';
 import PrimaryBtn from '../../../Component/Btn/PrimaryBtn';
 import InputField from '../../../Component/Input/InputField';
-import {clearLoginError, RegisterUser} from '../../slices/userSlice';
+import {
+  clearLoginError,
+  RegisterUser,
+  setLoginError,
+} from '../../slices/userSlice';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import {Activity_Opacity, handleNavigate} from '../../../../utils/global';
 
@@ -27,18 +32,28 @@ export default function Register() {
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const {isLogining, isloginError} = useSelector(state => state.user);
-
   const RegisterScheme = Yup.object().shape({
+    username: Yup.string().required('Username is required'),
     email: Yup.string()
       .email('Enter a valid email')
       .required('Email is required'),
+
     password: Yup.string().min(4, 'Too short').required('Password is required'),
   });
 
   const onSubmit = async values => {
-    console.log(values);
-    // Your login dispatch here
-    dispatch(RegisterUser(values));
+    const result = await dispatch(RegisterUser(values));
+    if (result?.success) {
+      // Navigate to next screen or show success message
+      navigation.goBack();
+    } else {
+      // Error is already set by setLoginError
+    }
+  };
+
+  const LoginBack = () => {
+    dispatch(setLoginError(''));
+    navigation.goBack();
   };
 
   return (
@@ -69,7 +84,7 @@ export default function Register() {
               </View>
 
               <Formik
-                initialValues={{email: '', password: ''}}
+                initialValues={{username: '', email: '', password: ''}}
                 validationSchema={RegisterScheme}
                 onSubmit={onSubmit}>
                 {({
@@ -89,6 +104,20 @@ export default function Register() {
                         color={colors.text_secondary}
                       />
                     </View>
+                    <InputField
+                      placeholder="Enter username"
+                      value={values.username}
+                      label="Username"
+                      onChangeText={text => {
+                        if (isloginError) dispatch(clearLoginError());
+                        handleChange('username')(text);
+                      }}
+                      onBlur={handleBlur('username')}
+                      error={errors.username}
+                      touched={touched.username}
+                      leftIcon="username"
+                    />
+
                     <InputField
                       placeholder="Enter email"
                       value={values.email}
@@ -131,8 +160,13 @@ export default function Register() {
                         label={isLogining ? 'Loading...' : 'Register'}
                       />
                     </View>
+                    <HelperText
+                      className="font-regular text-center"
+                      style={{color: colors.error}}>
+                      {isloginError}
+                    </HelperText>
                     <TouchableOpacity
-                      onPress={() => navigation.goBack()}
+                      onPress={LoginBack}
                       activeOpacity={Activity_Opacity}
                       className="mt-4 items-center">
                       <Text

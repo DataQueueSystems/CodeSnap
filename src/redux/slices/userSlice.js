@@ -1,50 +1,149 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import axios from 'axios';
 import firestore from '@react-native-firebase/firestore';
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getUserDetails = createAsyncThunk(
   'user/getuserdetail',
-  async parsedDetail => {
+  async (parsedDetail, {dispatch}) => {
     try {
-      const response = await axios.post(
-        `${CLOUD_URL}/getuserDetail`,
-        parsedDetail,
-        {
-          headers: {
-            Authorization: `Bearer ${parsedDetail?.token}`, // Ensure token exists
-          },
-        },
-      );
-      return response.data; // Return only the data part
+      const userId = parsedDetail?.id;
+      if (!userId) {
+        throw new Error('User ID is missing');
+      }
+      // Listen to Firestore document changes
+      const unsubscribe = firestore()
+        .collection('users')
+        .doc(userId)
+        .onSnapshot(snapshot => {
+          if (snapshot.exists) {
+            const userData = snapshot.data();
+            // Fix createdAt field if needed
+            if (userData.createdAt?.toDate) {
+              userData.createdAt = userData.createdAt.toDate().toISOString();
+            }
+            const fullUserData = {
+              ...userData,
+              id: snapshot.id,
+            };
+            // Dispatch updated user data into Redux
+            dispatch(setUser(fullUserData));
+          }
+        });
+      // Return the unsubscribe function in case you want to stop listening later
+      return unsubscribe;
     } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error; //  Ensure Redux handles the error properly
+      throw error; // Let Redux handle the error
     }
   },
 );
-
 // Firestore Register Function
-export const RegisterUser = (userData) => async (dispatch) => {
+export const RegisterUser = userData => async dispatch => {
   try {
+    const querySnapshot = await firestore()
+      .collection('users')
+      .where('email', '==', userData.email)
+      .get();
+
+    if (!querySnapshot.empty) {
+      dispatch(setLoginError('Email already registered.'));
+      return {success: false, error: 'Email already registered.'};
+    }
     await firestore()
-      .collection('users') // your collection name
+      .collection('users')
       .add({
         ...userData,
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        createdAt: firestore.FieldValue.serverTimestamp(), // 👈 use Firestore server timestamp
       });
-
-    console.log('User registered successfully!');
-    
-    // Optional: Dispatch success action if you have Redux actions
-    // dispatch({ type: 'REGISTER_SUCCESS' });
-
+    return {success: true};
   } catch (error) {
-    console.error('Error registering user:', error);
-    
-    // Optional: Dispatch error action
-    // dispatch({ type: 'REGISTER_FAIL', payload: error.message });
+    dispatch(setLoginError(error.message));
+    return {success: false, error: error.message};
+  }
+};
+
+export const LoginUser = loginData => async dispatch => {
+  try {
+    const querySnapshot = await firestore()
+      .collection('users')
+      .where('email', '==', loginData.email)
+      .get();
+
+    if (querySnapshot.empty) {
+      dispatch(setLoginError('Incorrect email or password'));
+      return {success: false, error: 'Incorrect email or password'};
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    const userData = userDoc.data();
+    const userId = userDoc.id; // Get the document ID
+
+    if (userData.password !== loginData.password) {
+      dispatch(setLoginError('Incorrect email or password'));
+      return {success: false, error: 'Incorrect email or password'};
+    }
+
+    // Fix createdAt
+    if (userData.createdAt?.toDate) {
+      userData.createdAt = userData.createdAt.toDate().toISOString();
+    }
+
+    // Attach id with userData
+    const fullUserData = {
+      ...userData,
+      id: userId,
+    };
+
+    // Save full user data to Redux
+    dispatch(setUser(fullUserData));
+
+    // Save only username and id to AsyncStorage
+    const minimalUserData = {
+      username: userData.username,
+      id: userId,
+    };
+
+    await AsyncStorage.setItem(
+      'credentialDetail',
+      JSON.stringify(minimalUserData),
+    );
+
+    return {success: true, user: fullUserData};
+  } catch (error) {
+    dispatch(setLoginError(error.message));
+    return {success: false, error: error.message};
+  }
+};
+
+export const UpdateUser = updatedData => async dispatch => {
+  try {
+    const querySnapshot = await firestore()
+      .collection('users')
+      .where('email', '==', updatedData.email)
+      .get();
+    if (querySnapshot.empty) {
+      dispatch(setUpdateError('User not found'));
+      return {success: false, error: 'User not found'};
+    }
+    const userDoc = querySnapshot.docs[0];
+    const userRef = firestore().collection('users').doc(userDoc.id);
+    // Update the user document
+    await userRef.update(updatedData);
+    // Get the updated user data
+    const updatedUserSnapshot = await userRef.get();
+    const updatedUserData = updatedUserSnapshot.data();
+    // Fix createdAt field if needed
+    if (updatedUserData.createdAt?.toDate) {
+      updatedUserData.createdAt = updatedUserData.createdAt
+        .toDate()
+        .toISOString();
+    }
+    // Save updated user to Redux
+    dispatch(setUser(updatedUserData));
+
+    return {success: true, user: updatedUserData};
+  } catch (error) {
+    dispatch(setUpdateError(error.message));
+    return {success: false, error: error.message};
   }
 };
 
@@ -56,17 +155,28 @@ const initialState = {
   isLogining: false,
   gettinguserError: '',
   isloginError: '',
+  isprofileError: '',
+  isUpdateError: '',
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    logoutUser: state => {
-      state.user = null;
-    },
     clearLoginError: state => {
       state.isloginError = ''; // Reset error when user types
+    },
+    clearProfileError: state => {
+      state.isprofileError = ''; // Reset error when user types
+    },
+    setLoginError: (state, action) => {
+      state.isloginError = action.payload; // Reset error when user types
+    },
+    setUpdateError: (state, action) => {
+      state.isUpdateError = action.payload; // Reset error when user types
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
     },
   },
   extraReducers: builder => {
@@ -92,5 +202,11 @@ const userSlice = createSlice({
 });
 
 // Export actions and reducer
-export const {logoutUser, clearLoginError} = userSlice.actions;
+export const {
+  logoutUser,
+  clearLoginError,
+  clearProfileError,
+  setLoginError,
+  setUser,
+} = userSlice.actions;
 export default userSlice.reducer;

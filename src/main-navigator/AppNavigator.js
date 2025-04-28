@@ -11,29 +11,26 @@ import Login from '../redux/Screen/Auth/Login';
 import Register from '../redux/Screen/Auth/Register';
 import Parent from './Parent';
 import SingleChat from '../redux/Screen/Chats/SingleChat';
+import ViewProfile from '../redux/Screen/Profile/ViewProfile';
+import EditProfile from '../redux/Screen/Profile/EditProfile';
 const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
-  const {token, tokenStatus, isConnected} = useSelector(state => state?.normal);
+  const {token, tokenStatus, isConnected, loading} = useSelector(
+    state => state?.normal,
+  );
   let theme = useTheme();
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getStoredcredential()); // Trigger the getToken action to check for the token
   }, [dispatch]);
-
-  if (tokenStatus === 'loading') {
+  console.log(loading, 'loadingloadingloading');
+  if (tokenStatus == 'loading' && loading==true) {
     // If status is loading, show a spinner
     return <Loader />;
   }
 
   const isDarkTheme = theme.colors.background_default === '#000000';
   let barStyle = isDarkTheme ? 'light-content' : 'dark-content';
-
-  const handleSetting = () => {
-    Linking.openSettings().catch(() => {
-      console.log('Failed to open settings');
-    });
-  };
-
   return (
     <>
       <StatusBar
@@ -52,20 +49,8 @@ export default function AppNavigator() {
               options={{animation: 'fade_from_bottom'}}
             />
           ) : (
-            // <Stack.Screen
-            //   name="Parent"
-            //   component={Parent}
-            //   options={{animation: 'fade_from_bottom'}}
-            // />
-            // If token is valid, navigate to Parent screen
             <></>
           )}
-
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{animation: 'fade_from_bottom'}}
-          />
 
           <Stack.Screen
             name="Parent"
@@ -74,10 +59,31 @@ export default function AppNavigator() {
           />
 
           <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{animation: 'ios_from_right'}}
+          />
+
+          <Stack.Screen
             name="Register"
             component={Register}
-            options={{animation: 'fade_from_bottom'}}
+            options={{animation: 'ios_from_right'}}
           />
+
+          {/* View Profile */}
+          <Stack.Screen
+            name="ViewProfile"
+            component={ViewProfile}
+            options={{animation: 'ios_from_right'}}
+          />
+
+          {/* Edit Profile */}
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfile}
+            options={{animation: 'ios_from_right'}}
+          />
+
           {/* single Chat */}
           <Stack.Screen
             name="Single Chat"
