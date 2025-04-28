@@ -51,7 +51,7 @@ export default function AppHeader({
         title={screenName}
         titleStyle={{
           fontSize: 17,
-          textAlign: 'center',
+          textAlign: !backIcon ? '' : 'center',
           fontFamily: 'Poppins-Medium',
           color: colors.text_primary,
           left: !backIcon ? 0 : 0,

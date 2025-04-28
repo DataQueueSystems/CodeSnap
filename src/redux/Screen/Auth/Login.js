@@ -10,14 +10,18 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Text, useTheme, IconButton} from 'react-native-paper';
+import {Text, useTheme, IconButton, HelperText} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch, useSelector} from 'react-redux';
 import PrimaryBtn from '../../../Component/Btn/PrimaryBtn';
 import InputField from '../../../Component/Input/InputField';
-import {clearLoginError} from '../../slices/userSlice';
+import {
+  clearLoginError,
+  LoginUser,
+  setLoginError,
+} from '../../slices/userSlice';
 import {handleNavigate, isPlatformIOS} from '../../../../utils/global';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
@@ -26,19 +30,27 @@ export default function Login() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-
   const {isLogining, isloginError} = useSelector(state => state.user);
   const LoginSchema = Yup.object().shape({
     email: Yup.string()
       .email('Enter a valid email')
       .required('Email is required'),
-    password: Yup.string().min(4, 'Too short').required('Password is required'),
+    password: Yup.string().required('Password is required'),
   });
 
   const onSubmit = async values => {
-    console.log(values);
-    navigation.navigate("Parent")
-    // Your login dispatch here
+    const result = await dispatch(LoginUser(values));
+    if (result?.success) {
+      navigation.navigate('Parent');
+    } else {
+      console.log('Login failed:', result?.error);
+      // Optionally show an error toast/snackbar here
+    }
+  };
+
+  const RegisterAccount = () => {
+    dispatch(setLoginError(''));
+    handleNavigate(navigation, 'Register');
   };
 
   return (
@@ -53,7 +65,7 @@ export default function Login() {
               <View className="items-center justify-center py-4">
                 <Image
                   source={require('../../../../assets/image/logo.png')}
-                  className="h-20 w-20 rounded-full shadow-2xl"
+                  className="h-28 w-28 rounded-full shadow-2xl"
                   style={{
                     shadowColor: colors.primary_main,
                   }}
@@ -70,7 +82,7 @@ export default function Login() {
 
               <Formik
                 initialValues={{email: '', password: ''}}
-                // validationSchema={LoginSchema}
+                validationSchema={LoginSchema}
                 onSubmit={onSubmit}>
                 {({
                   handleChange,
@@ -123,6 +135,11 @@ export default function Login() {
                         />
                       }
                     />
+                    <HelperText
+                      className="font-regular text-center"
+                      style={{color: colors.error}}>
+                      {isloginError}
+                    </HelperText>
 
                     <View style={{marginTop: 24}}>
                       <PrimaryBtn
@@ -132,7 +149,7 @@ export default function Login() {
                       />
                       <PrimaryBtn
                         disabled={true}
-                        onSubmit={() => handleNavigate(navigation, 'Register')}
+                        onSubmit={RegisterAccount}
                         label={isLogining ? 'Loading...' : 'Create New Account'}
                       />
                     </View>

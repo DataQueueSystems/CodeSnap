@@ -7,10 +7,13 @@ import {
   getGreeting,
   handleNavigate,
 } from '../../../utils/global';
+import {useSelector} from 'react-redux';
 
 export default function HomeHeader({}) {
   let {colors} = useTheme();
   let navigation = useNavigation();
+  const {user} = useSelector(state => state?.user);
+
   return (
     <>
       <View className="flex-row justify-between items-center px-3 mt-12 ">
@@ -42,7 +45,7 @@ export default function HomeHeader({}) {
               <Text
                 className="text-2xl uppercase text-white font-regular"
                 style={{}}>
-                A
+                {user?.username?.charAt(0)?.toUpperCase()}
               </Text>
             </View>
           </TouchableOpacity>
@@ -57,7 +60,7 @@ export default function HomeHeader({}) {
           style={{
             color: colors.text_primary,
           }}>
-          Mahammad Murshid
+          {user?.username}
         </Text>
       </View>
     </>

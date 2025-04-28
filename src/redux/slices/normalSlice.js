@@ -1,6 +1,7 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import {getUserDetails, setUser} from './userSlice';
 
 export const getStoredcredential = createAsyncThunk(
   'auth/getStoredcredential',
@@ -10,7 +11,9 @@ export const getStoredcredential = createAsyncThunk(
     if (parsedDetail) {
       // Set token in Redux first
       dispatch(setToken(parsedDetail));
-      // dispatch(getUserDetails(parsedDetail)); // Now fetch user details after setting the token
+      console.log(parsedDetail, 'parsedDetail');
+      dispatch(getUserDetails(parsedDetail)); // Now fetch user details after setting the token
+      await dispatch(setUserLoading(false));
     }
     return parsedDetail;
   },
@@ -22,6 +25,7 @@ const initialState = {
   error: null,
   refreshKey: 0, // Store refresh key in Redux
   isConnected: true,
+  loading: true,
 };
 
 const normalSlice = createSlice({
@@ -33,9 +37,13 @@ const normalSlice = createSlice({
     },
     logout: state => {
       state.token = null;
+      AsyncStorage.clear();
     },
     setConnectionStatus: (state, action) => {
       state.isConnected = action.payload;
+    },
+    setUserLoading: (state, action) => {
+      state.loading = action.payload;
     },
   },
   extraReducers: builder => {
@@ -46,7 +54,6 @@ const normalSlice = createSlice({
       .addCase(getStoredcredential.fulfilled, (state, action) => {
         state.tokenStatus = 'succeeded';
         state.token = action.payload;
-        // console.log('Token in store:', state.token); // Log the token in store
       })
       .addCase(getStoredcredential.rejected, (state, action) => {
         state.tokenStatus = 'failed';
@@ -63,6 +70,7 @@ export const subscribeToNetwork = dispatch => {
 };
 
 // Export actions from slice
-export const {setToken, logout, setConnectionStatus} = normalSlice.actions;
+export const {setToken, logout, setConnectionStatus, setUserLoading} =
+  normalSlice.actions;
 // Export the reducer
 export default normalSlice.reducer;

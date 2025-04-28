@@ -3,7 +3,7 @@ import React from 'react';
 import {useTheme} from 'react-native-paper';
 import {Activity_Opacity} from '../../../utils/global';
 
-export default function SmallBtn({lable, onPress, success, fail}) {
+export default function SmallBtn({label, onPress, success, fail}) {
   let {colors} = useTheme();
   let TextColor = success
     ? colors.primary_main
@@ -22,7 +22,7 @@ export default function SmallBtn({lable, onPress, success, fail}) {
             color: TextColor,
           }}
           className="text-sm font-p_medium ">
-          {lable}
+          {label}
         </Text>
       </TouchableOpacity>
     </>
