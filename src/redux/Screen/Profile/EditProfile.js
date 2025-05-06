@@ -20,18 +20,16 @@ import {useDispatch, useSelector} from 'react-redux';
 import PrimaryBtn from '../../../Component/Btn/PrimaryBtn';
 import SmallBtn from '../../../Component/Btn/SmallBtn';
 import {UpdateUser} from '../../slices/userSlice';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 export default function EditProfile() {
   const {colors} = useTheme();
-  let navigation=useNavigation();
+  let navigation = useNavigation();
   const dispatch = useDispatch();
   const [skillInput, setSkillInput] = React.useState('');
   const [languageInput, setLanguageInput] = React.useState('');
   const formikRef = useRef(null); // Create a ref for Formik instance
-  const {user,isUpdateError} = useSelector(state => state?.user);
-  
-
+  const {user, isUpdateError} = useSelector(state => state?.user);
 
   const ProfileSchema = Yup.object().shape({
     username: Yup.string().required('Username is required'),
@@ -52,35 +50,35 @@ export default function EditProfile() {
       .url('Enter a valid website URL')
       .required('Website link is required'),
     contribution: Yup.string().required('Contribution is required'),
-    isAvailable: Yup.boolean()
-      .required('Availability status is required')
-      .typeError('Availability must be true or false'),
+    location: Yup.string().required('Location is required'),
+    info: Yup.string().required('Info is required'),
   });
+
 
   const handleAddSkill = (setFieldValue, values) => {
     if (skillInput.trim() !== '') {
-      setFieldValue('skills', [...values.skills, skillInput.trim()]);
+      const currentSkills = values.skills || []; // fallback to empty array
+      setFieldValue('skills', [...currentSkills, skillInput.trim()]);
       setSkillInput('');
     }
   };
-
+  
   const handleAddLanguage = (setFieldValue, values) => {
     if (languageInput.trim() !== '') {
-      setFieldValue('languagesKnown', [
-        ...values.languagesKnown,
-        languageInput.trim(),
-      ]);
+      const currentLanguages = values.languagesKnown || []; // fallback to empty array
+      setFieldValue('languagesKnown', [...currentLanguages, languageInput.trim()]);
       setLanguageInput('');
     }
   };
+  
 
   const onSubmit = async values => {
-   let result=await dispatch(UpdateUser(values));
-   if(result?.success){
-    navigation.goBack();
-   }else{
-    Alert.alert("something went wrong !..")
-   }
+    let result = await dispatch(UpdateUser(values));
+    if (result?.success) {
+      navigation.goBack();
+    } else {
+      Alert.alert('something went wrong !..');
+    }
   };
 
   return (
@@ -170,9 +168,9 @@ export default function EditProfile() {
                         </View>
 
                         {/* Display added skills */}
-                        {values.skills.length > 0 && (
+                        {values?.skills?.length > 0 && (
                           <View className="my-4 py-1 gap-2 flex-row flex-wrap">
-                            {values.skills.map((skill, index) => (
+                            {values?.skills?.map((skill, index) => (
                               <View
                                 key={index}
                                 className="mx-1.5 p-1.5 min-w-[48px] rounded-lg"
@@ -211,9 +209,9 @@ export default function EditProfile() {
                         </View>
 
                         {/* Display added languages */}
-                        {values.languagesKnown.length > 0 && (
+                        {values?.languagesKnown?.length > 0 && (
                           <View className="my-4 py-1 gap-2 flex-row flex-wrap">
-                            {values.languagesKnown.map((lang, index) => (
+                            {values?.languagesKnown?.map((lang, index) => (
                               <View
                                 key={index}
                                 className="mx-1.5 p-1.5 min-w-[48px] rounded-lg"
@@ -251,6 +249,7 @@ export default function EditProfile() {
                           error={errors.contact}
                           touched={touched.contact}
                           keyboardType="phone-pad"
+                          limit={10}
                         />
 
                         {/* GitHub Link */}
@@ -291,7 +290,7 @@ export default function EditProfile() {
                           placeholder="Location"
                           value={values.location}
                           label="Location"
-                          onChangeText={handleChange('Location')}
+                          onChangeText={handleChange('location')}
                           onBlur={handleBlur('Location')}
                           error={errors.location}
                           touched={touched.location}

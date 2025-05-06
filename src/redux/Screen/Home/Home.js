@@ -15,12 +15,13 @@ import HomeAnim from '../../../Component/Anim/HomeAnim';
 import SmallBtn from '../../../Component/Btn/SmallBtn';
 import {useNavigation} from '@react-navigation/native';
 import InCompleteProfile from '../Profile/InCompleteProfile';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
 export default function Home() {
   let {colors} = useTheme();
   let navigation = useNavigation();
-  const {user,alluser}=useSelector(state=>state?.user);
+  const {user, alluser, chatLabels} = useSelector(state => state?.user);
+
   let isProfileUpdated = user?.location && user?.info;
   return (
     <>
@@ -34,11 +35,8 @@ export default function Home() {
             <HomeHeader />
 
             {/* Incomplete Profile */}
-            {!isProfileUpdated&&(
-              <InCompleteProfile />
-            )}
+            {!isProfileUpdated && <InCompleteProfile />}
 
-            
             {/* Divider */}
             <View className="flex-1 my-3">
               <Divider
@@ -76,9 +74,13 @@ export default function Home() {
             <View className="bottom-20">
               <UserCard />
             </View>
-            <View className="bottom-20">
-              <RecentChat />
-            </View>
+            {chatLabels?.length == 0 ? (
+              <></>
+            ) : (
+              <View className="bottom-20">
+                <RecentChat />
+              </View>
+            )}
           </ScrollView>
         </View>
       </SafeAreaView>

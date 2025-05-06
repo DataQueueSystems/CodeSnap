@@ -193,27 +193,87 @@ export const getAllUsersExcludingCurrent = () => async (dispatch, getState) => {
   }
 };
 
+export const getChatLabelForUser = createAsyncThunk(
+  'user/getChatLabels',
+  async (_, {getState, dispatch}) => {
+    const {id: userId} = getState().user?.user;
+    const unsubscribe = firestore()
+      .collection('chatLabels')
+      .doc(userId)
+      .onSnapshot(
+        doc => {
+          if (!doc.exists) {
+            dispatch(setChatLabels([])); // Dispatch empty array if document doesn't exist
+            return;
+          }
+          const data = doc.data();
+          const labels = Object.keys(data)
+            .filter(key => key.startsWith('chat'))
+            .map(key => ({
+              key,
+              label: data[key].label || 'Untitled Chat',
+              uniqId: data[key].uniqId || '',
+            }));
+          dispatch(setChatLabels(labels)); // Dispatch labels to Redux store
+        },
+        error => {
+          console.error('Error fetching chat labels:', error);
+        },
+      );
 
-export const fetchSingleUserDetails = async userId => {
-  if (!userId) throw new Error('User ID is required');
+    // Return unsubscribe function for cleanup
+    return unsubscribe;
+  },
+);
 
-  const snapshot = await firestore().collection('users').doc(userId).get();
+export const getAllChatsForUser = createAsyncThunk(
+  'chat/getAllChats',
+  async (uniqId = null, {dispatch, getState}) => {
+    try {
+      const {id: userId} = getState().user?.user;
+      const doc = await firestore().collection('chats').doc(userId).get();
 
-  if (!snapshot.exists) {
-    return null;
-  }
+      if (!doc.exists) {
+        throw new Error('No chat document found for this user');
+      }
 
-  let userData = snapshot.data();
+      const data = doc.data();
+      const allChats = [];
 
-  if (userData.createdAt?.toDate) {
-    userData.createdAt = userData.createdAt.toDate().toISOString();
-  }
+      // Only get specific chat if uniqId is passed
+      if (uniqId) {
+        const key = `chat${uniqId}`;
+        if (data[key]) {
+          const chat = {
+            key,
+            label: data[key].label || 'Untitled',
+            messages: data[key].messages || [],
+          };
+          dispatch(setSingleChat([chat]));
+          return [chat];
+        } else {
+          throw new Error('Requested chat not found');
+        }
+      }
+      // If no uniqId, return all chats
+      Object.keys(data)?.forEach(key => {
+        if (key.startsWith('chat')) {
+          allChats?.push({
+            key,
+            label: data[key].label || 'Untitled',
+            messages: data[key].messages || [],
+          });
+        }
+      });
 
-  return {
-    ...userData,
-    id: snapshot.id,
-  };
-};
+      dispatch(setSingleChat(allChats));
+      return allChats;
+    } catch (error) {
+      console.error('Error fetching chats: ', error);
+      throw error;
+    }
+  },
+);
 
 const initialState = {
   user: null,
@@ -226,6 +286,8 @@ const initialState = {
   isloginError: '',
   isprofileError: '',
   isUpdateError: '',
+  chatLabels: [],
+  allUserChat: [],
 };
 
 const userSlice = createSlice({
@@ -249,6 +311,12 @@ const userSlice = createSlice({
     },
     setAllUser: (state, action) => {
       state.alluser = action.payload;
+    },
+    setChatLabels: (state, action) => {
+      state.chatLabels = action.payload;
+    },
+    setSingleChat: (state, action) => {
+      state.allUserChat = action.payload;
     },
   },
   extraReducers: builder => {
@@ -281,5 +349,7 @@ export const {
   setLoginError,
   setUser,
   setAllUser,
+  setChatLabels,
+  setSingleChat,
 } = userSlice.actions;
 export default userSlice.reducer;
