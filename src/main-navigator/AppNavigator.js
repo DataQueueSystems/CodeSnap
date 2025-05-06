@@ -14,6 +14,7 @@ import SingleChat from '../redux/Screen/Chats/SingleChat';
 import ViewProfile from '../redux/Screen/Profile/ViewProfile';
 import EditProfile from '../redux/Screen/Profile/EditProfile';
 import SingleUser from '../redux/Screen/Users/SingleUser';
+import Notification from '../redux/Screen/Notification/Notification';
 const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   const {token, tokenStatus, isConnected, loading} = useSelector(
@@ -24,7 +25,6 @@ export default function AppNavigator() {
   useEffect(() => {
     dispatch(getStoredcredential()); // Trigger the getToken action to check for the token
   }, [dispatch]);
-  console.log(loading, 'loadingloadingloading');
   if (tokenStatus == 'loading' && loading == true) {
     // If status is loading, show a spinner
     return <Loader />;
@@ -95,6 +95,12 @@ export default function AppNavigator() {
           <Stack.Screen
             name="Single User"
             component={SingleUser}
+            options={{animation: 'fade_from_bottom'}}
+          />
+
+          <Stack.Screen
+            name="Notification"
+            component={Notification}
             options={{animation: 'fade_from_bottom'}}
           />
         </Stack.Navigator>

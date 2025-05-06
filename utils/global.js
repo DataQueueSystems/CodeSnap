@@ -30,6 +30,15 @@ const getGreeting = () => {
   }
 };
 
+
+// Function to clean up the label by removing extra spaces and newlines
+const cleanLabel = (label) => {
+  return label
+    .replace(/(\r\n|\n|\r)/g, ' ')  // Replace newlines with a space
+    .replace(/\s+/g, ' ')           // Replace multiple spaces with a single space
+    .trim();                        // Remove leading and trailing spaces
+};
+
 export {
   Wwidth,
   Wheight,
@@ -40,4 +49,5 @@ export {
   isPlatformIOS,
   handleNavigate,
   getGreeting,
+  cleanLabel
 };

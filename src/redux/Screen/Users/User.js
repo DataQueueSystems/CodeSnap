@@ -33,7 +33,9 @@ export default function User() {
     if (selectCategory !== 'All') {
       filtered = filtered.filter(u =>
         u?.collaborateList?.some(
-          collaborator => collaborator?.userId === loggedInUserId,
+          collaborator =>
+            collaborator?.userId === loggedInUserId &&
+            collaborator?.status !== 'revoke',
         ),
       );
     }

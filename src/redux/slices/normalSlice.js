@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import {getUserDetails, setUser} from './userSlice';
 import firestore from '@react-native-firebase/firestore';
+import axios from 'axios';
 
 
 export const getStoredcredential = createAsyncThunk(
@@ -13,7 +14,6 @@ export const getStoredcredential = createAsyncThunk(
     if (parsedDetail) {
       // Set token in Redux first
       dispatch(setToken(parsedDetail));
-      console.log(parsedDetail, 'parsedDetail');
       dispatch(getUserDetails(parsedDetail)); // Now fetch user details after setting the token
       await dispatch(setUserLoading(false));
     }
@@ -37,7 +37,6 @@ export const updateCollaborate = (targetUserId, status = 'pending') => async (di
       dispatch(setUpdateError('User not found'));
       return { success: false, error: 'User not found' };
     }
-
     const existingList = userDoc.data()?.collaborateList || [];
 
     const userIndex = existingList.findIndex(item => item.userId === loginedUserId);
@@ -50,9 +49,8 @@ export const updateCollaborate = (targetUserId, status = 'pending') => async (di
       // If not exists, add as new collaborator
       updatedList.push({ userId: loginedUserId, status });
     }
-
     await userRef.update({ collaborateList: updatedList });
-    return { success: true };
+    return { success: true,userId:updatedList[0]?.userId };
   } catch (error) {
     dispatch(setUpdateError(error.message));
     return { success: false, error: error.message };
@@ -60,6 +58,40 @@ export const updateCollaborate = (targetUserId, status = 'pending') => async (di
 };
 
 
+
+// const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_KEY = 'AIzaSyAB-Sa7bHyI6zBDwPzVskyD0voBpm85G8Q'; // Replace this with your key
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+export const getCodeExplanation = async (codeText) => {
+  try {
+    const response = await axios.post(
+      `${GEMINI_API_URL}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Explain this code:\n\n${codeText}`
+              }
+            ]
+          }
+        ]
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const explanation = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return explanation || "No explanation found.";
+  } catch (error) {
+    console.error("Gemini API error:", error.message);
+    return "Failed to get explanation.";
+  }
+};
 
 
 const initialState = {

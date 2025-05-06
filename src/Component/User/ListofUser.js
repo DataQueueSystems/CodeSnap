@@ -11,21 +11,23 @@ import {
 } from '../../../utils/global';
 
 import Ionicon from 'react-native-vector-icons/Ionicons';
+import SmallBtn from '../Btn/SmallBtn';
 
-export default function ListofUser({userData}) {
+export default function ListofUser({
+  userData,
+  notification,
+  handleCollaborate,
+}) {
   const navigation = useNavigation();
   let {colors} = useTheme();
   const recentpaymentloading = false;
   const RenderItem = ({user, index}) => {
     const isLastItem = index === userData.length - 1;
-    const {username, designation, createdAt,id} = user;
-    console.log(id,'ididid');
-    
-
+    const {username, designation, createdAt, id} = user;
     return (
       <React.Fragment key={user?.name}>
         <TouchableOpacity
-          onPress={() => handleNavigate(navigation, 'Single User', id)}
+          onPress={() => handleNavigate(navigation, 'Single User', user)}
           activeOpacity={Activity_Opacity}
           className="flex-row items-center  my-3.5 rounded-xl space-x-3 ">
           <View
@@ -39,25 +41,41 @@ export default function ListofUser({userData}) {
           </View>
           <View className="flex-1 space-y-0.5">
             <Text className="text-md font-p_medium">{username}</Text>
-            <Text className="text-xs font-p_light">{designation}</Text>
+            {designation && (
+              <Text className="text-xs font-p_light">{designation}</Text>
+            )}
             <Text
               className="text-xs font-p_light"
               style={{color: colors.text_secondary}}>
               Joined on {moment(createdAt).format('MMM D, YYYY [at] h:mm A')}
             </Text>
           </View>
-
-          <View
-            className="p-2 rounded-full"
-            style={{
-              backgroundColor: colors.category,
-            }}>
-            <Ionicon
-              name="arrow-forward-outline"
-              size={22}
-              color={colors.text_secondary}
-            />
-          </View>
+          {notification ? (
+            <>
+              <View className="flex-row ">
+                <SmallBtn
+                  label={'Accept'}
+                  onPress={() => handleCollaborate(id, 'accepted')}
+                />
+                <SmallBtn
+                  label={'Reject'}
+                  onPress={() => handleCollaborate(id, 'rejected')}
+                />
+              </View>
+            </>
+          ) : (
+            <View
+              className="p-2 rounded-full"
+              style={{
+                backgroundColor: colors.category,
+              }}>
+              <Ionicon
+                name="arrow-forward-outline"
+                size={22}
+                color={colors.text_secondary}
+              />
+            </View>
+          )}
         </TouchableOpacity>
 
         {!isLastItem && (
@@ -79,7 +97,7 @@ export default function ListofUser({userData}) {
       ) : userData?.length === 0 ? (
         <View className="flex-1 justify-center items-center mt-12">
           <Text className="text-gray-500 font-regular text-lg">
-            No users found
+            {notification ? 'No pending requests' : 'No users found'}
           </Text>
         </View>
       ) : (

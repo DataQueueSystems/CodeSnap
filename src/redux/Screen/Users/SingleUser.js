@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useTheme, Text, Menu, Divider} from 'react-native-paper';
 import AppHeader from '../../../Component/AppHeader/Header';
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -17,53 +17,33 @@ import {Activity_Opacity, hexToRgba} from '../../../../utils/global';
 import {useDispatch, useSelector} from 'react-redux';
 import {updateCollaborate} from '../../slices/normalSlice';
 import {showToast} from '../../../../utils/Toast';
-import {
-  fetchSingleUserDetails,
-  getSingleUserDetails,
-} from '../../slices/userSlice';
+import SmallBtn from '../../../Component/Btn/SmallBtn';
 
 export default function SingleUser({route}) {
-  // Assume this is inside your component
-  const {data} = route.params || {}; // Here, data = userId like "DVzYqNpJ45YGs0Y8u1S2"
+  let {data} = route.params || {};
   const {user: loginedUser} = useSelector(state => state.user);
-
-  const [user, setUser] = useState(null);
-  const [isCollated, setIsCollated] = useState(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        if (data) {
-          const userData = await fetchSingleUserDetails(data);
-          setUser(userData);
-          // Check if logged-in user is in collaborateList
-          const collab = userData?.collaborateList?.find(
-            item => item?.userId === loginedUser?.id,
-          );
-          setIsCollated(collab || null);
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
-    };
-
-    fetchUser();
-  }, [data, loginedUser?.id]);
-
+  const isCollated = data?.collaborateList?.find(
+    collaborator => collaborator?.userId === loginedUser?.id,
+  );
   const {colors} = useTheme();
   let navigation = useNavigation();
+
+  let user = data || {};
   let dispatch = useDispatch();
+  const [visible2, setVisible2] = useState(false);
 
   const handleCollaborate = async status => {
-    const result = await dispatch(updateCollaborate(data, status));
+    await setVisible2(false);
+    const result = await dispatch(updateCollaborate(data?.id, status));
     if (result?.success) {
       showToast(`Collaboration ${status}ed successfully!`, 'success');
+      setTimeout(() => {
+        navigation.goBack();
+      }, 100); // give UI time to update
     } else {
       showToast(result?.error || 'Something went wrong.', 'error');
     }
   };
-
-  const [visible2, setVisible2] = useState(false);
 
   const handlePress = () => {
     // Show an alert with Cancel and Send options
@@ -78,7 +58,7 @@ export default function SingleUser({route}) {
         },
         {
           text: 'Send',
-          onPress: handleCollaborate,
+          onPress: () => handleCollaborate('pending'),
         },
       ],
     );
@@ -86,70 +66,20 @@ export default function SingleUser({route}) {
 
   const RenderIcon = () => (
     <View className="flex-row space-x-3 items-center">
-      {isCollated ? (
+      {isCollated && isCollated?.status != 'revoke' ? (
         <>
           <Text className="text-sm font-regular capitalize">
             {isCollated?.status}
           </Text>
-
-          {isCollated?.status && (
-            <Menu
-              visible={visible2}
-              onDismiss={() => setVisible2(false)}
-              contentStyle={{
-                top: 80,
-                backgroundColor: colors.background_paper,
-                borderColor: hexToRgba(colors.primary_main, 0.2),
-                borderWidth: 1,
-                maxHeight: 300,
-              }}
-              anchor={
-                <TouchableOpacity
-                  onPress={() => setVisible2(!visible2)}
-                  activeOpacity={Activity_Opacity}>
-                  <Ionicon
-                    name="chevron-down-outline"
-                    size={22}
-                    color={colors.text_secondary}
-                  />
-                </TouchableOpacity>
-              }>
-              {/* Show Accept if not already accepted */}
-              {isCollated.status !== 'accepted' && (
-                <>
-                  <Menu.Item
-                    title="Approve Collaboration"
-                    titleStyle={{
-                      fontFamily: 'Poppins-Regular',
-                      textAlign: 'center',
-                      fontSize: 13,
-                    }}
-                    onPress={() => handleCollaborate('accepted')}
-                  />
-                  {isCollated.status !== 'rejected' && (
-                    <Divider
-                      style={{
-                        backgroundColor: hexToRgba(colors.primary_main, 0.3),
-                      }}
-                    />
-                  )}
-                </>
-              )}
-
-              {/* Show Reject if not already rejected */}
-              {isCollated.status !== 'rejected' && (
-                <Menu.Item
-                  title="Reject Collaboration"
-                  titleStyle={{
-                    fontFamily: 'Poppins-Regular',
-                    textAlign: 'center',
-                    fontSize: 13,
-                  }}
-                  onPress={() => handleCollaborate('rejected')}
+          {isCollated?.status != 'revoke' &&
+            isCollated?.status != 'pending' && (
+              <View className="left-2">
+                <SmallBtn
+                  label={'Revoke Access'}
+                  onPress={() => handleCollaborate('revoke')}
                 />
-              )}
-            </Menu>
-          )}
+              </View>
+            )}
         </>
       ) : (
         <TouchableOpacity
@@ -175,7 +105,10 @@ export default function SingleUser({route}) {
           {/* Profile data  */}
           <UserProfile user={user} />
 
-          <View className="my-2 rounded-2xl shadow-2xl">
+{user?.info?(
+
+<>
+<View className="my-2 rounded-2xl shadow-2xl">
             <View className="my-1.5 px-2">
               <InfoRow
                 iconName="information-circle-outline"
@@ -199,6 +132,19 @@ export default function SingleUser({route}) {
           {!!user?.languagesKnown && (
             <ProfileSection title="Lang Known" data={user.languagesKnown} />
           )}
+</>
+):(
+<>
+<View className="my-4 items-center">
+    <Text className="text-base font-p_medium text-center">
+      This user hasn’t updated their profile information yet.
+    </Text>
+  </View>
+
+</>
+)}
+
+       
         </View>
       </SafeAreaView>
     </>

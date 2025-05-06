@@ -74,9 +74,9 @@ export default function Profile() {
         )}
 
         {/* Skills and Languages */}
-        {!!user?.skills && <ProfileSection title="Skills" data={user.skills} />}
+        {!!user?.skills && <ProfileSection title="Skills" data={user?.skills} />}
         {!!user?.languagesKnown && (
-          <ProfileSection title="Lang Known" data={user.languagesKnown} />
+          <ProfileSection title="Lang Known" data={user?.languagesKnown} />
         )}
       </View>
     </SafeAreaView>

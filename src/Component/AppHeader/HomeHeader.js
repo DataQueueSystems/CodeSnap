@@ -1,7 +1,9 @@
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import {Text, useTheme} from 'react-native-paper';
+import {Badge, Text, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
+import Ionicon from 'react-native-vector-icons/Ionicons';
+
 import {
   Activity_Opacity,
   getGreeting,
@@ -36,6 +38,17 @@ export default function HomeHeader({}) {
 
         {/* Profile Avtar  */}
         <View className="flex-row items-center space-x-3">
+          <TouchableOpacity
+          onPress={()=>handleNavigate(navigation,"Notification")}
+            activeOpacity={Activity_Opacity}
+            className="relative">
+            <Ionicon
+              name="notifications-outline"
+              size={25}
+              color={colors.text_secondary}
+            />
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => handleNavigate(navigation, 'Profile')}
             activeOpacity={Activity_Opacity}>
