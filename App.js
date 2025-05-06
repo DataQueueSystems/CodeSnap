@@ -4,6 +4,10 @@ import {Provider} from 'react-redux';
 import store from './src/redux/store/store';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppWithTheme from './src/main-navigator/AppwithTheme';
+import {ContextProvider} from './src/AuthContext/FuncContext.js';
+import { toastConfig } from './utils/Toast.js';
+import Toast from 'react-native-toast-message';
+
 
 export default function App() {
   useEffect(() => {
@@ -18,9 +22,15 @@ export default function App() {
       {/* this gesture handler for bottom sheet */}
       <GestureHandlerRootView className="flex-1">
         <Provider store={store}>
+        <ContextProvider>
           <AppWithTheme />
+          </ContextProvider>
         </Provider>
       </GestureHandlerRootView>
+
+
+        {/* For Toast Message  */}
+        <Toast config={toastConfig} />
     </>
   );
 }

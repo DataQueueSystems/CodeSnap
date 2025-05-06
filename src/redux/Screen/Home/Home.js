@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 export default function Home() {
   let {colors} = useTheme();
   let navigation = useNavigation();
-  const {user}=useSelector(state=>state?.user);
+  const {user,alluser}=useSelector(state=>state?.user);
   let isProfileUpdated = user?.location && user?.info;
   return (
     <>
@@ -76,7 +76,6 @@ export default function Home() {
             <View className="bottom-20">
               <UserCard />
             </View>
-
             <View className="bottom-20">
               <RecentChat />
             </View>

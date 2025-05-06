@@ -129,26 +129,95 @@ export const UpdateUser = updatedData => async dispatch => {
     // Update the user document
     await userRef.update(updatedData);
     // Get the updated user data
-    const updatedUserSnapshot = await userRef.get();
-    const updatedUserData = updatedUserSnapshot.data();
-    // Fix createdAt field if needed
-    if (updatedUserData.createdAt?.toDate) {
-      updatedUserData.createdAt = updatedUserData.createdAt
-        .toDate()
-        .toISOString();
-    }
+    await userRef.get();
+    // const updatedUserSnapshot = await userRef.get();
+    // const updatedUserData = updatedUserSnapshot.data();
+    // // Fix createdAt field if needed
+    // if (updatedUserData.createdAt?.toDate) {
+    //   updatedUserData.createdAt = updatedUserData.createdAt
+    //     .toDate()
+    //     .toISOString();
+    // }
     // Save updated user to Redux
-    dispatch(setUser(updatedUserData));
-
-    return {success: true, user: updatedUserData};
+    // dispatch(setUser(updatedUserData));
+    return {success: true};
   } catch (error) {
     dispatch(setUpdateError(error.message));
     return {success: false, error: error.message};
   }
 };
 
+// Function to fetch all user data excluding the logged-in user
+export const getAllUsersExcludingCurrent = () => async (dispatch, getState) => {
+  try {
+    const {email: currentUserEmail} = getState().user?.user;
+
+    if (!currentUserEmail) {
+      console.error('No logged-in user found!');
+      return;
+    }
+
+    const usersRef = firestore().collection('users');
+
+    const unsubscribe = usersRef
+      .where('email', '!=', currentUserEmail)
+      .onSnapshot(
+        snapshot => {
+          const users = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            users.push({
+              id: doc.id,
+              ...data,
+              createdAt:
+                data.createdAt?.toDate?.() instanceof Date
+                  ? data.createdAt.toDate().toISOString()
+                  : null,
+              updatedAt:
+                data.updatedAt?.toDate?.() instanceof Date
+                  ? data.updatedAt.toDate().toISOString()
+                  : null,
+            });
+          });
+
+          dispatch(setAllUser(users));
+        },
+        error => {
+          console.log('Error fetching users:', error.message);
+        },
+      );
+
+    return unsubscribe;
+  } catch (error) {
+    console.log('Error:', error.message);
+  }
+};
+
+
+export const fetchSingleUserDetails = async userId => {
+  if (!userId) throw new Error('User ID is required');
+
+  const snapshot = await firestore().collection('users').doc(userId).get();
+
+  if (!snapshot.exists) {
+    return null;
+  }
+
+  let userData = snapshot.data();
+
+  if (userData.createdAt?.toDate) {
+    userData.createdAt = userData.createdAt.toDate().toISOString();
+  }
+
+  return {
+    ...userData,
+    id: snapshot.id,
+  };
+};
+
 const initialState = {
   user: null,
+  alluser: [],
   status: 'idle', // 'idle', 'loading', 'succeeded', 'failed'
   error: null,
   role: '',
@@ -177,6 +246,9 @@ const userSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
+    },
+    setAllUser: (state, action) => {
+      state.alluser = action.payload;
     },
   },
   extraReducers: builder => {
@@ -208,5 +280,6 @@ export const {
   clearProfileError,
   setLoginError,
   setUser,
+  setAllUser,
 } = userSlice.actions;
 export default userSlice.reducer;

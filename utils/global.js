@@ -13,8 +13,8 @@ const hexToRgba = (hex, alpha = 1) => {
   let b = parseInt(hex.substring(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
-const handleNavigate = (navigation,path) => {
-  navigation.navigate(path);
+const handleNavigate = (navigation, path, data) => {
+  navigation.navigate(path, {data});
 };
 
 const getGreeting = () => {
@@ -30,7 +30,6 @@ const getGreeting = () => {
   }
 };
 
-
 export {
   Wwidth,
   Wheight,
@@ -40,5 +39,5 @@ export {
   hexToRgba,
   isPlatformIOS,
   handleNavigate,
-  getGreeting
+  getGreeting,
 };
