@@ -4,49 +4,28 @@ import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import Loader from '../Loader/Loader';
 import {useTheme, Text, Divider} from 'react-native-paper';
-import {Activity_Opacity, hexToRgba} from '../../../utils/global';
+import {
+  Activity_Opacity,
+  handleNavigate,
+  hexToRgba,
+} from '../../../utils/global';
 
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
-export default function ListofUser({}) {
+export default function ListofUser({userData}) {
   const navigation = useNavigation();
   let {colors} = useTheme();
   const recentpaymentloading = false;
-
-  const userData = [
-    {
-      name: 'Alice Johnson',
-      createdAt: '2025-04-20T09:00:00Z',
-      amount: 900,
-      image: 'https://via.placeholder.com/100',
-      category: 'Student',
-    },
-    {
-      name: 'Bob Lee',
-      createdAt: '2025-04-22T14:30:00Z',
-      image: 'https://via.placeholder.com/100',
-      category: 'Student',
-    },
-    {
-      name: 'Alice Johnson',
-      createdAt: '2025-04-20T09:00:00Z',
-      amount: 900,
-      image: 'https://via.placeholder.com/100',
-      category: 'Software Developer',
-    },
-    {
-      name: 'Bob Lee',
-      createdAt: '2025-04-22T14:30:00Z',
-      image: 'https://via.placeholder.com/100',
-      category: 'Software Engineer',
-    },
-  ];
   const RenderItem = ({user, index}) => {
     const isLastItem = index === userData.length - 1;
+    const {username, designation, createdAt,id} = user;
+    console.log(id,'ididid');
+    
 
     return (
       <React.Fragment key={user?.name}>
         <TouchableOpacity
+          onPress={() => handleNavigate(navigation, 'Single User', id)}
           activeOpacity={Activity_Opacity}
           className="flex-row items-center  my-3.5 rounded-xl space-x-3 ">
           <View
@@ -55,21 +34,20 @@ export default function ListofUser({}) {
             <Text
               className="text-xl uppercase text-white font-p_medium"
               style={{}}>
-              A
+              {username?.charAt(0)?.toUpperCase()}
             </Text>
           </View>
           <View className="flex-1 space-y-0.5">
-            <Text className="text-md font-p_medium">{user.name}</Text>
-            <Text className="text-xs font-p_light">{user?.category}</Text>
+            <Text className="text-md font-p_medium">{username}</Text>
+            <Text className="text-xs font-p_light">{designation}</Text>
             <Text
               className="text-xs font-p_light"
               style={{color: colors.text_secondary}}>
-              Joined on {moment().format('MMM D, YYYY')}
+              Joined on {moment(createdAt).format('MMM D, YYYY [at] h:mm A')}
             </Text>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={Activity_Opacity}
+          <View
             className="p-2 rounded-full"
             style={{
               backgroundColor: colors.category,
@@ -79,7 +57,7 @@ export default function ListofUser({}) {
               size={22}
               color={colors.text_secondary}
             />
-          </TouchableOpacity>
+          </View>
         </TouchableOpacity>
 
         {!isLastItem && (
@@ -100,7 +78,9 @@ export default function ListofUser({}) {
         <Loader />
       ) : userData?.length === 0 ? (
         <View className="flex-1 justify-center items-center mt-12">
-          <Text className="text-gray-500">No users found</Text>
+          <Text className="text-gray-500 font-regular text-lg">
+            No users found
+          </Text>
         </View>
       ) : (
         <FlatList

@@ -20,14 +20,18 @@ import {useDispatch, useSelector} from 'react-redux';
 import PrimaryBtn from '../../../Component/Btn/PrimaryBtn';
 import SmallBtn from '../../../Component/Btn/SmallBtn';
 import {UpdateUser} from '../../slices/userSlice';
+import { useNavigation } from '@react-navigation/native';
 
 export default function EditProfile() {
   const {colors} = useTheme();
+  let navigation=useNavigation();
   const dispatch = useDispatch();
   const [skillInput, setSkillInput] = React.useState('');
   const [languageInput, setLanguageInput] = React.useState('');
   const formikRef = useRef(null); // Create a ref for Formik instance
-  const {isUpdateError} = useSelector(state => state?.user);
+  const {user,isUpdateError} = useSelector(state => state?.user);
+  
+
 
   const ProfileSchema = Yup.object().shape({
     username: Yup.string().required('Username is required'),
@@ -71,24 +75,12 @@ export default function EditProfile() {
   };
 
   const onSubmit = async values => {
-    console.log(values, 'values');
-    let data = {
-      username: 'JohnDoe',
-      email: 'm@gmail.com',
-      password: 'Test@1234',
-      location: 'Mangalore',
-      skills: ['React Native', 'React'],
-      languagesKnown: ['English', 'Hindi'],
-      designation: 'Software Developer',
-      contact: '9876543210',
-      githubLink: 'https://github.com/johndoe',
-      websiteLink: 'https://johndoe.dev',
-      contribution:
-        'Built multiple open-source projects and contributed to major repositories.',
-      isAvailable: true,
-      info: 'hello, my info',
-    };
-    dispatch(UpdateUser(data));
+   let result=await dispatch(UpdateUser(values));
+   if(result?.success){
+    navigation.goBack();
+   }else{
+    Alert.alert("something went wrong !..")
+   }
   };
 
   return (
@@ -109,22 +101,8 @@ export default function EditProfile() {
                 <View className="flex-1 px-5 pt-5">
                   <Formik
                     innerRef={formikRef} // Assign ref to Formik
-                    initialValues={{
-                      username: '',
-                      email: '',
-                      password: '',
-                      skills: [],
-                      languagesKnown: [],
-                      designation: '',
-                      contact: '',
-                      githubLink: '',
-                      websiteLink: '',
-                      contribution: '',
-                      isAvailable: false,
-                      location: '',
-                      info: '',
-                    }}
-                    // validationSchema={ProfileSchema}
+                    initialValues={user}
+                    validationSchema={ProfileSchema}
                     onSubmit={onSubmit}>
                     {({
                       handleChange,
