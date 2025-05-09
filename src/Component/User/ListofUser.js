@@ -1,5 +1,9 @@
-import React, {use} from 'react';
-import {FlatList, Image, TouchableOpacity, View} from 'react-native';
+import React from 'react';
+import {
+  FlatList,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import Loader from '../Loader/Loader';
@@ -19,23 +23,23 @@ export default function ListofUser({
   handleCollaborate,
 }) {
   const navigation = useNavigation();
-  let {colors} = useTheme();
+  const {colors} = useTheme();
   const recentpaymentloading = false;
+
   const RenderItem = ({user, index}) => {
     const isLastItem = index === userData.length - 1;
-    const {username, designation, createdAt, id} = user;
+    const {username, designation, createdAt, sentByMe} = user;
+
     return (
-      <React.Fragment key={user?.name}>
+      <React.Fragment key={user?.id}>
         <TouchableOpacity
           onPress={() => handleNavigate(navigation, 'Single User', user)}
           activeOpacity={Activity_Opacity}
-          className="flex-row items-center  my-3.5 rounded-xl space-x-3 ">
+          className="flex-row items-center my-3.5 rounded-xl space-x-3">
           <View
-            className="w-10 h-10 rounded-full flex-row items-center justify-center shadow-2xl "
+            className="w-10 h-10 rounded-full flex-row items-center justify-center shadow-2xl"
             style={{backgroundColor: colors.text_disabled}}>
-            <Text
-              className="text-xl uppercase text-white font-p_medium"
-              style={{}}>
+            <Text className="text-xl uppercase text-white font-p_medium">
               {username?.charAt(0)?.toUpperCase()}
             </Text>
           </View>
@@ -50,25 +54,38 @@ export default function ListofUser({
               Joined on {moment(createdAt).format('MMM D, YYYY [at] h:mm A')}
             </Text>
           </View>
+
           {notification ? (
-            <>
-              <View className="flex-row ">
+            !sentByMe ? (
+              <View className="flex-row">
                 <SmallBtn
                   label={'Accept'}
-                  onPress={() => handleCollaborate(id, 'accepted')}
+                  onPress={() =>
+                    handleCollaborate(user.collaborationMeta.id, 'accepted')
+                  }
                 />
                 <SmallBtn
                   label={'Reject'}
-                  onPress={() => handleCollaborate(id, 'rejected')}
+                  onPress={() =>
+                    handleCollaborate(user.collaborationMeta.id, 'rejected')
+                  }
                 />
               </View>
-            </>
+            ) : (
+              <View
+                className="px-3 py-1 rounded-full"
+                style={{backgroundColor: colors.primary}}>
+                <Text
+                  className="text-sm font-p_medium"
+                  style={{color: colors.text_primary}}>
+                  Pending
+                </Text>
+              </View>
+            )
           ) : (
             <View
               className="p-2 rounded-full"
-              style={{
-                backgroundColor: colors.category,
-              }}>
+              style={{backgroundColor: colors.category}}>
               <Ionicon
                 name="arrow-forward-outline"
                 size={22}

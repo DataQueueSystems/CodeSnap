@@ -193,6 +193,50 @@ export const getAllUsersExcludingCurrent = () => async (dispatch, getState) => {
   }
 };
 
+
+// Function to fetch all collaboration data using the logged-in user's ID
+export const getAllCollaborationsByLoggedInUser = () => async (dispatch, getState) => {
+  try {
+    const { id: loggedInUserId } = getState().user?.user; // Get logged-in user ID
+    if (!loggedInUserId) {
+      console.error('No logged-in user found!');
+      return;
+    }
+
+    const collabRef = firestore().collection('collaborators');
+
+    const unsubscribe = collabRef.onSnapshot(
+      snapshot => {
+        const collaborations = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          collaborations.push({
+            id: doc.id, // Include the collaboration document ID
+            ...data,
+            createdAt:
+              data.createdAt?.toDate?.() instanceof Date
+                ? data.createdAt.toDate().toISOString()
+                : null,
+            updatedAt:
+              data.updatedAt?.toDate?.() instanceof Date
+                ? data.updatedAt.toDate().toISOString()
+                : null,
+          });
+        });
+        dispatch(setAllCollaborations(collaborations)); // Dispatch action to set collaborations in the state
+      },
+      error => {
+        console.log('Error fetching collaborations:', error.message);
+      }
+    );
+
+    return unsubscribe;
+  } catch (error) {
+    console.log('Error:', error.message);
+  }
+};
+
+
 export const getChatLabelForUser = createAsyncThunk(
   'user/getChatLabels',
   async (_, {getState, dispatch}) => {
@@ -206,15 +250,17 @@ export const getChatLabelForUser = createAsyncThunk(
             dispatch(setChatLabels([])); // Dispatch empty array if document doesn't exist
             return;
           }
-          const data = doc.data();
-          const labels = Object.keys(data)
-            .filter(key => key.startsWith('chat'))
-            .map(key => ({
-              key,
-              label: data[key].label || 'Untitled Chat',
-              uniqId: data[key].uniqId || '',
-            }));
-          dispatch(setChatLabels(labels)); // Dispatch labels to Redux store
+          const data = doc?.data();
+          if (data) {
+            const labels = Object?.keys(data)
+              .filter(key => key.startsWith('chat'))
+              .map(key => ({
+                key,
+                label: data[key].label || 'Untitled Chat',
+                uniqId: data[key].uniqId || '',
+              }));
+            dispatch(setChatLabels(labels)); // Dispatch labels to Redux store
+          }
         },
         error => {
           console.error('Error fetching chat labels:', error);
@@ -288,6 +334,8 @@ const initialState = {
   isUpdateError: '',
   chatLabels: [],
   allUserChat: [],
+  allCollaborations: [],
+
 };
 
 const userSlice = createSlice({
@@ -317,6 +365,9 @@ const userSlice = createSlice({
     },
     setSingleChat: (state, action) => {
       state.allUserChat = action.payload;
+    },
+    setAllCollaborations: (state, action) => {
+      state.allCollaborations = action.payload;
     },
   },
   extraReducers: builder => {
@@ -351,5 +402,6 @@ export const {
   setAllUser,
   setChatLabels,
   setSingleChat,
+  setAllCollaborations
 } = userSlice.actions;
 export default userSlice.reducer;
